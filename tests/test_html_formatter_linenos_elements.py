@@ -6,6 +6,7 @@ import pytest
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
+from .support import structural_diff
 
 TESTDIR = os.path.dirname(os.path.abspath(__file__))
 EXPECTED_OUTPUT_DIR = os.path.join(TESTDIR, "html_linenos_expected_output")
@@ -23,8 +24,9 @@ def single_line(text):
 @pytest.mark.parametrize("linenostart", ["1", "8"])
 @pytest.mark.parametrize("linenospecial", ["0", "3"])
 @pytest.mark.parametrize("anchorlinenos", ["False", "True"])
+@pytest.mark.parametrize("filename", ["", "testfilename"])
 def test_linenos_elements(
-    linenos, noclasses, linenostep, linenostart, linenospecial, anchorlinenos
+    linenos, noclasses, linenostep, linenostart, linenospecial, anchorlinenos, filename
 ):
     options = dict(
         linenos=linenos,
@@ -33,6 +35,7 @@ def test_linenos_elements(
         linenostart=linenostart,
         linenospecial=linenospecial,
         anchorlinenos=anchorlinenos,
+        filename=filename,
     )
 
     output = StringIO()
@@ -47,9 +50,15 @@ def test_linenos_elements(
     filename_parts.append("start_" + linenostart)
     filename_parts.append("special_" + linenospecial)
     filename_parts.append("anchor" if anchorlinenos == "True" else "noanchor")
+    filename_parts.append("filename" if filename else "nofilename")
     expected_html_filename = "_".join(filename_parts) + ".html"
 
-    with open(os.path.join(EXPECTED_OUTPUT_DIR, expected_html_filename)) as f:
+    # with open(os.path.join(EXPECTED_OUTPUT_DIR, expected_html_filename), 'w') as f:
+    #     import bs4 as BeautifulSoup
+    #     f.write(str(BeautifulSoup.BeautifulSoup(html, 'html.parser')))
+
+    with open(os.path.join(EXPECTED_OUTPUT_DIR, expected_html_filename),
+              encoding="utf-8") as f:
         expected_html = f.read()
 
-    assert single_line(html) == single_line(expected_html)
+    structural_diff.structural_diff(html, expected_html)

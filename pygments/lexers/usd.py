@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.usd
     ~~~~~~~~~~~~~~~~~~~
 
     The module that parses Pixar's Universal Scene Description file format.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -36,6 +35,7 @@ class UsdLexer(RegexLexer):
     """
 
     name = "USD"
+    url = 'https://graphics.pixar.com/usd/release/index.html'
     aliases = ["usd", "usda"]
     filenames = ["*.usd", "*.usda"]
 

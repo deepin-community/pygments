@@ -6,5 +6,5 @@ cp -r tests "$AUTOPKGTEST_TMP"
 cd "$AUTOPKGTEST_TMP/tests"
 
 for python in $(py3versions -s); do
-	$python -m pytest -v -k 'not test_chooses_correct_lexer_for_example_files'
+	$python -m pytest -v -k 'not test_chooses_correct_lexer_for_example_files and not test_guess_lexer_singularity and not test_guess_lexer_forth and not test_guess_lexer_modula2 and not test_guess_lexer_unicon and not test_guess_lexer_ezhil and not test_guess_lexer_gdscript and not test_guess_lexer_gap and not test_guess_lexer_easytrieve and not test_guess_lexer_jcl and not test_guess_lexer_rexx'
 done

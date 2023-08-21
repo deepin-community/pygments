@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.pointless
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Lexers for Pointless.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -18,12 +17,13 @@ __all__ = ['PointlessLexer']
 
 class PointlessLexer(RegexLexer):
     """
-    For `Pointless <https://ptls.dev>`_ source code.
+    For Pointless source code.
 
     .. versionadded:: 2.7
     """
 
     name = 'Pointless'
+    url = 'https://ptls.dev'
     aliases = ['pointless']
     filenames = ['*.ptls']
 

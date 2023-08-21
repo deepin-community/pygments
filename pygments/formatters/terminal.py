@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 """
     pygments.formatters.terminal
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Formatter for terminal output with ANSI sequences.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
-
-import sys
 
 from pygments.formatter import Formatter
 from pygments.token import Keyword, Name, Comment, String, Error, \

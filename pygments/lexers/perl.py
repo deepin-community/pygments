@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.perl
     ~~~~~~~~~~~~~~~~~~~~
 
     Lexers for Perl, Raku and related languages.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -14,7 +13,7 @@ import re
 from pygments.lexer import RegexLexer, ExtendedRegexLexer, include, bygroups, \
     using, this, default, words
 from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation
+    Number, Punctuation, Whitespace
 from pygments.util import shebang_matches
 
 __all__ = ['PerlLexer', 'Perl6Lexer']
@@ -22,10 +21,11 @@ __all__ = ['PerlLexer', 'Perl6Lexer']
 
 class PerlLexer(RegexLexer):
     """
-    For `Perl <https://www.perl.org>`_ source code.
+    For Perl source code.
     """
 
     name = 'Perl'
+    url = 'https://www.perl.org'
     aliases = ['perl', 'pl']
     filenames = ['*.pl', '*.pm', '*.t', '*.perl']
     mimetypes = ['text/x-perl', 'application/x-perl']
@@ -56,7 +56,7 @@ class PerlLexer(RegexLexer):
                 'CHECK', 'INIT', 'END', 'return'), suffix=r'\b'),
              Keyword),
             (r'(format)(\s+)(\w+)(\s*)(=)(\s*\n)',
-             bygroups(Keyword, Text, Name, Text, Punctuation, Text), 'format'),
+             bygroups(Keyword, Whitespace, Name, Whitespace, Punctuation, Whitespace), 'format'),
             (r'(eq|lt|gt|le|ge|ne|not|and|or|cmp)\b', Operator.Word),
             # common delimiters
             (r's/(\\\\|\\[^\\]|[^\\/])*/(\\\\|\\[^\\]|[^\\/])*/[egimosx]*',
@@ -79,7 +79,7 @@ class PerlLexer(RegexLexer):
             (r'm(?=[/!\\{<\[(@%$])', String.Regex, 'balanced-regex'),
             (r'((?<==~)|(?<=\())\s*/(\\\\|\\[^\\]|[^\\/])*/[gcimosx]*',
                 String.Regex),
-            (r'\s+', Text),
+            (r'\s+', Whitespace),
             (words((
                 'abs', 'accept', 'alarm', 'atan2', 'bind', 'binmode', 'bless', 'caller', 'chdir',
                 'chmod', 'chomp', 'chop', 'chown', 'chr', 'chroot', 'close', 'closedir', 'connect',
@@ -110,7 +110,7 @@ class PerlLexer(RegexLexer):
              Name.Builtin),
             (r'((__(DATA|DIE|WARN)__)|(STD(IN|OUT|ERR)))\b', Name.Builtin.Pseudo),
             (r'(<<)([\'"]?)([a-zA-Z_]\w*)(\2;?\n.*?\n)(\3)(\n)',
-             bygroups(String, String, String.Delimiter, String, String.Delimiter, Text)),
+             bygroups(String, String, String.Delimiter, String, String.Delimiter, Whitespace)),
             (r'__END__', Comment.Preproc, 'end-part'),
             (r'\$\^[ADEFHILMOPSTWX]', Name.Variable.Global),
             (r"\$[\\\"\[\]'&`+*.,;=%~?@$!<>(^|/-](?!\w)", Name.Variable.Global),
@@ -132,10 +132,10 @@ class PerlLexer(RegexLexer):
             (r'(q|qq|qw|qr|qx)\<', String.Other, 'lt-string'),
             (r'(q|qq|qw|qr|qx)([\W_])(.|\n)*?\2', String.Other),
             (r'(package)(\s+)([a-zA-Z_]\w*(?:::[a-zA-Z_]\w*)*)',
-             bygroups(Keyword, Text, Name.Namespace)),
+             bygroups(Keyword, Whitespace, Name.Namespace)),
             (r'(use|require|no)(\s+)([a-zA-Z_]\w*(?:::[a-zA-Z_]\w*)*)',
-             bygroups(Keyword, Text, Name.Namespace)),
-            (r'(sub)(\s+)', bygroups(Keyword, Text), 'funcname'),
+             bygroups(Keyword, Whitespace, Name.Namespace)),
+            (r'(sub)(\s+)', bygroups(Keyword, Whitespace), 'funcname'),
             (words((
                 'no', 'package', 'require', 'use'), suffix=r'\b'),
              Keyword),
@@ -151,7 +151,7 @@ class PerlLexer(RegexLexer):
             (r'[^\n]*\n', String.Interpol),
         ],
         'varname': [
-            (r'\s+', Text),
+            (r'\s+', Whitespace),
             (r'\{', Punctuation, '#pop'),    # hash syntax?
             (r'\)|,', Punctuation, '#pop'),  # argument specifier
             (r'\w+::', Name.Namespace),
@@ -166,9 +166,9 @@ class PerlLexer(RegexLexer):
         ],
         'funcname': [
             (r'[a-zA-Z_]\w*[!?]?', Name.Function),
-            (r'\s+', Text),
+            (r'\s+', Whitespace),
             # argument declaration
-            (r'(\([$@%]*\))(\s*)', bygroups(Punctuation, Text)),
+            (r'(\([$@%]*\))(\s*)', bygroups(Punctuation, Whitespace)),
             (r';', Punctuation, '#pop'),
             (r'.*?\{', Punctuation, '#pop'),
         ],
@@ -208,24 +208,35 @@ class PerlLexer(RegexLexer):
     def analyse_text(text):
         if shebang_matches(text, r'perl'):
             return True
+
+        result = 0
+
         if re.search(r'(?:my|our)\s+[$@%(]', text):
-            return 0.9
+            result += 0.9
+
+        if ':=' in text:
+            # := is not valid Perl, but it appears in unicon, so we should
+            # become less confident if we think we found Perl with :=
+            result /= 2
+
+        return result
 
 
 class Perl6Lexer(ExtendedRegexLexer):
     """
-    For `Raku <https://www.raku.org>`_ (a.k.a. Perl 6) source code.
+    For Raku (a.k.a. Perl 6) source code.
 
     .. versionadded:: 2.0
     """
 
     name = 'Perl6'
+    url = 'https://www.raku.org'
     aliases = ['perl6', 'pl6', 'raku']
     filenames = ['*.pl', '*.pm', '*.nqp', '*.p6', '*.6pl', '*.p6l', '*.pl6',
                  '*.6pm', '*.p6m', '*.pm6', '*.t', '*.raku', '*.rakumod',
                  '*.rakutest', '*.rakudoc']
     mimetypes = ['text/x-perl6', 'application/x-perl6']
-    flags = re.MULTILINE | re.DOTALL | re.UNICODE
+    flags = re.MULTILINE | re.DOTALL
 
     PERL6_IDENTIFIER_RANGE = r"['\w:-]"
 
@@ -596,7 +607,7 @@ class Perl6Lexer(ExtendedRegexLexer):
             (r'(regex|token|rule)(?!' + PERL6_IDENTIFIER_RANGE + r')(\s*' + PERL6_IDENTIFIER_RANGE + '+)?',
              bygroups(Keyword, Name), 'pre-token'),
             # deal with a special case in the Perl 6 grammar (role q { ... })
-            (r'(role)(\s+)(q)(\s*)', bygroups(Keyword, Text, Name, Text)),
+            (r'(role)(\s+)(q)(\s*)', bygroups(Keyword, Whitespace, Name, Whitespace)),
             (_build_word_match(PERL6_KEYWORDS, PERL6_IDENTIFIER_RANGE), Keyword),
             (_build_word_match(PERL6_BUILTIN_CLASSES, PERL6_IDENTIFIER_RANGE, suffix='(?::[UD])?'),
              Name.Builtin),
@@ -710,6 +721,10 @@ class Perl6Lexer(ExtendedRegexLexer):
                 rating = 0.05
                 continue
             break
+
+        if ':=' in text:
+            # Same logic as above for PerlLexer
+            rating /= 2
 
         return rating
 

@@ -1,5 +1,2 @@
-0002-add-g-parameter-to-pygmentize-man-page.patch
-0003-docs-moved-to-python-pygments-doc-binary-package.patch
-0003-Update-change-docs-theme-patch.patch
-CVE-2021-20270.patch
-Fix-several-exponential-cubic-complexity-regexes-fou.patch
+0001-docs-moved-to-python-pygments-doc-binary-package.patch
+0002-pygments.bashcomp-Remove-hashbang-within-bash-comple.patch

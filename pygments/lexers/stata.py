@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.stata
     ~~~~~~~~~~~~~~~~~~~~~
 
     Lexer for Stata
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -21,7 +20,7 @@ __all__ = ['StataLexer']
 
 class StataLexer(RegexLexer):
     """
-    For `Stata <http://www.stata.com/>`_ do files.
+    For Stata do files.
 
     .. versionadded:: 2.2
     """
@@ -30,7 +29,8 @@ class StataLexer(RegexLexer):
     # - https://github.com/isagalaev/highlight.js/blob/master/src/languages/stata.js
     # - https://github.com/jpitblado/vim-stata/blob/master/syntax/stata.vim
 
-    name      = 'Stata'
+    name = 'Stata'
+    url = 'http://www.stata.com/'
     aliases   = ['stata', 'do']
     filenames = ['*.do', '*.ado']
     mimetypes = ['text/x-stata', 'text/stata', 'application/x-stata']

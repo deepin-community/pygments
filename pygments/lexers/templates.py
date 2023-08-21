@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.templates
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Lexers for various template engines' markup.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -19,6 +18,7 @@ from pygments.lexers.python import PythonLexer
 from pygments.lexers.perl import PerlLexer
 from pygments.lexers.jvm import JavaLexer, TeaLangLexer
 from pygments.lexers.data import YamlLexer
+from pygments.lexers.sql import SqlLexer
 from pygments.lexer import Lexer, DelegatingLexer, RegexLexer, bygroups, \
     include, using, this, default, combined
 from pygments.token import Error, Punctuation, Whitespace, \
@@ -44,13 +44,13 @@ __all__ = ['HtmlPhpLexer', 'XmlPhpLexer', 'CssPhpLexer',
            'TeaTemplateLexer', 'LassoHtmlLexer', 'LassoXmlLexer',
            'LassoCssLexer', 'LassoJavascriptLexer', 'HandlebarsLexer',
            'HandlebarsHtmlLexer', 'YamlJinjaLexer', 'LiquidLexer',
-           'TwigLexer', 'TwigHtmlLexer', 'Angular2Lexer', 'Angular2HtmlLexer']
+           'TwigLexer', 'TwigHtmlLexer', 'Angular2Lexer', 'Angular2HtmlLexer',
+           'SqlJinjaLexer']
 
 
 class ErbLexer(Lexer):
     """
-    Generic `ERB <http://ruby-doc.org/core/classes/ERB.html>`_ (Ruby Templating)
-    lexer.
+    Generic ERB (Ruby Templating) lexer.
 
     Just highlights ruby code between the preprocessor directives, other data
     is left untouched by the lexer.
@@ -59,6 +59,7 @@ class ErbLexer(Lexer):
     """
 
     name = 'ERB'
+    url = 'https://github.com/ruby/erb'
     aliases = ['erb']
     mimetypes = ['application/x-ruby-templating']
 
@@ -144,13 +145,14 @@ class ErbLexer(Lexer):
 
 class SmartyLexer(RegexLexer):
     """
-    Generic `Smarty <http://smarty.php.net/>`_ template lexer.
+    Generic Smarty template lexer.
 
     Just highlights smarty code between the preprocessor directives, other
     data is left untouched by the lexer.
     """
 
     name = 'Smarty'
+    url = 'https://www.smarty.net/'
     aliases = ['smarty']
     filenames = ['*.tpl']
     mimetypes = ['application/x-smarty']
@@ -179,8 +181,8 @@ class SmartyLexer(RegexLexer):
             (r'(true|false|null)\b', Keyword.Constant),
             (r"[0-9](\.[0-9]*)?(eE[+-][0-9])?[flFLdD]?|"
              r"0[xX][0-9a-fA-F]+[Ll]?", Number),
-            (r'"(\\\\|\\"|[^"])*"', String.Double),
-            (r"'(\\\\|\\'|[^'])*'", String.Single),
+            (r'"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r"'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r'[a-zA-Z_]\w*', Name.Attribute)
         ]
     }
@@ -200,13 +202,14 @@ class SmartyLexer(RegexLexer):
 
 class VelocityLexer(RegexLexer):
     """
-    Generic `Velocity <http://velocity.apache.org/>`_ template lexer.
+    Generic Velocity template lexer.
 
     Just highlights velocity directives and variable references, other
     data is left untouched by the lexer.
     """
 
     name = 'Velocity'
+    url = 'https://velocity.apache.org/'
     aliases = ['velocity']
     filenames = ['*.vm', '*.fhtml']
 
@@ -252,8 +255,8 @@ class VelocityLexer(RegexLexer):
             (r'\$!?\{?', Punctuation, 'variable'),
             (r'\s+', Text),
             (r'[,:]', Punctuation),
-            (r'"(\\\\|\\"|[^"])*"', String.Double),
-            (r"'(\\\\|\\'|[^'])*'", String.Single),
+            (r'"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r"'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r"0[xX][0-9a-fA-F]+[Ll]?", Number),
             (r"\b[0-9]+\b", Number),
             (r'(true|false|null)\b', Keyword.Constant),
@@ -268,11 +271,11 @@ class VelocityLexer(RegexLexer):
 
     def analyse_text(text):
         rv = 0.0
-        if re.search(r'#\{?macro\}?\(.*?\).*?#\{?end\}?', text):
+        if re.search(r'#\{?macro\}?\(.*?\).*?#\{?end\}?', text, re.DOTALL):
             rv += 0.25
-        if re.search(r'#\{?if\}?\(.+?\).*?#\{?end\}?', text):
+        if re.search(r'#\{?if\}?\(.+?\).*?#\{?end\}?', text, re.DOTALL):
             rv += 0.15
-        if re.search(r'#\{?foreach\}?\(.+?\).*?#\{?end\}?', text):
+        if re.search(r'#\{?foreach\}?\(.+?\).*?#\{?end\}?', text, re.DOTALL):
             rv += 0.15
         if re.search(r'\$!?\{?[a-zA-Z_]\w*(\([^)]*\))?'
                      r'(\.\w+(\([^)]*\))?)*\}?', text):
@@ -338,7 +341,7 @@ class DjangoLexer(RegexLexer):
             (r'[^{]+', Other),
             (r'\{\{', Comment.Preproc, 'var'),
             # jinja/django comments
-            (r'\{[*#].*?[*#]\}', Comment),
+            (r'\{#.*?#\}', Comment),
             # django comments
             (r'(\{%)(-?\s*)(comment)(\s*-?)(%\})(.*?)'
              r'(\{%)(-?\s*)(endcomment)(\s*-?)(%\})',
@@ -371,8 +374,8 @@ class DjangoLexer(RegexLexer):
             (r'(loop|block|super|forloop)\b', Name.Builtin),
             (r'[a-zA-Z_][\w-]*', Name.Variable),
             (r'\.\w+', Name.Variable),
-            (r':?"(\\\\|\\"|[^"])*"', String.Double),
-            (r":?'(\\\\|\\'|[^'])*'", String.Single),
+            (r':?"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r":?'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r'([{}()\[\]+\-*/%,:~]|[><=]=?|!=)', Operator),
             (r"[0-9](\.[0-9]*)?(eE[+-][0-9])?[flFLdD]?|"
              r"0[xX][0-9a-fA-F]+[Ll]?", Number),
@@ -403,15 +406,14 @@ class DjangoLexer(RegexLexer):
 
 class MyghtyLexer(RegexLexer):
     """
-    Generic `myghty templates`_ lexer. Code that isn't Myghty
+    Generic myghty templates lexer. Code that isn't Myghty
     markup is yielded as `Token.Other`.
 
     .. versionadded:: 0.6
-
-    .. _myghty templates: http://www.myghty.org/
     """
 
     name = 'Myghty'
+    url = 'http://www.myghty.org/'
     aliases = ['myghty']
     filenames = ['*.myt', 'autodelegate']
     mimetypes = ['application/x-myghty']
@@ -490,7 +492,7 @@ class MyghtyJavascriptLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Myghty'
-    aliases = ['js+myghty', 'javascript+myghty']
+    aliases = ['javascript+myghty', 'js+myghty']
     mimetypes = ['application/x-javascript+myghty',
                  'text/x-javascript+myghty',
                  'text/javascript+mygthy']
@@ -517,29 +519,27 @@ class MyghtyCssLexer(DelegatingLexer):
 
 class MasonLexer(RegexLexer):
     """
-    Generic `mason templates`_ lexer. Stolen from Myghty lexer. Code that isn't
+    Generic mason templates lexer. Stolen from Myghty lexer. Code that isn't
     Mason markup is HTML.
-
-    .. _mason templates: http://www.masonhq.com/
 
     .. versionadded:: 1.4
     """
     name = 'Mason'
+    url = 'http://www.masonhq.com/'
     aliases = ['mason']
     filenames = ['*.m', '*.mhtml', '*.mc', '*.mi', 'autohandler', 'dhandler']
     mimetypes = ['application/x-mason']
 
     tokens = {
         'root': [
-            (r'\s+', Text),
+            (r'\s+', Whitespace),
             (r'(?s)(<%doc>)(.*?)(</%doc>)',
              bygroups(Name.Tag, Comment.Multiline, Name.Tag)),
             (r'(?s)(<%(?:def|method))(\s*)(.*?)(>)(.*?)(</%\2\s*>)',
-             bygroups(Name.Tag, Text, Name.Function, Name.Tag,
+             bygroups(Name.Tag, Whitespace, Name.Function, Name.Tag,
                       using(this), Name.Tag)),
-            (r'(?s)(<%\w+)(.*?)(>)(.*?)(</%\2\s*>)',
-             bygroups(Name.Tag, Name.Function, Name.Tag,
-                      using(PerlLexer), Name.Tag)),
+            (r'(?s)(<%(\w+)(.*?)(>))(.*?)(</%\2\s*>)',
+             bygroups(Name.Tag, None, None, None, using(PerlLexer), Name.Tag)),
             (r'(?s)(<&[^|])(.*?)(,.*?)?(&>)',
              bygroups(Name.Tag, Name.Function, using(PerlLexer), Name.Tag)),
             (r'(?s)(<&\|)(.*?)(,.*?)?(&>)',
@@ -565,7 +565,7 @@ class MasonLexer(RegexLexer):
 
     def analyse_text(text):
         result = 0.0
-        if re.search(r'</%(class|doc|init)%>', text) is not None:
+        if re.search(r'</%(class|doc|init)>', text) is not None:
             result = 1.0
         elif re.search(r'<&.+&>', text, re.DOTALL) is not None:
             result = 0.11
@@ -574,15 +574,14 @@ class MasonLexer(RegexLexer):
 
 class MakoLexer(RegexLexer):
     """
-    Generic `mako templates`_ lexer. Code that isn't Mako
+    Generic mako templates lexer. Code that isn't Mako
     markup is yielded as `Token.Other`.
 
     .. versionadded:: 0.7
-
-    .. _mako templates: http://www.makotemplates.org/
     """
 
     name = 'Mako'
+    url = 'http://www.makotemplates.org/'
     aliases = ['mako']
     filenames = ['*.mao']
     mimetypes = ['application/x-mako']
@@ -590,12 +589,12 @@ class MakoLexer(RegexLexer):
     tokens = {
         'root': [
             (r'(\s*)(%)(\s*end(?:\w+))(\n|\Z)',
-             bygroups(Text, Comment.Preproc, Keyword, Other)),
+             bygroups(Text.Whitespace, Comment.Preproc, Keyword, Other)),
             (r'(\s*)(%)([^\n]*)(\n|\Z)',
-             bygroups(Text, Comment.Preproc, using(PythonLexer), Other)),
+             bygroups(Text.Whitespace, Comment.Preproc, using(PythonLexer), Other)),
             (r'(\s*)(##[^\n]*)(\n|\Z)',
-             bygroups(Text, Comment.Preproc, Other)),
-            (r'(?s)<%doc>.*?</%doc>', Comment.Preproc),
+             bygroups(Text.Whitespace, Comment.Single, Text.Whitespace)),
+            (r'(?s)<%doc>.*?</%doc>', Comment.Multiline),
             (r'(<%)([\w.:]+)',
              bygroups(Comment.Preproc, Name.Builtin), 'tag'),
             (r'(</%)([\w.:]+)(>)',
@@ -681,7 +680,7 @@ class MakoJavascriptLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Mako'
-    aliases = ['js+mako', 'javascript+mako']
+    aliases = ['javascript+mako', 'js+mako']
     mimetypes = ['application/x-javascript+mako',
                  'text/x-javascript+mako',
                  'text/javascript+mako']
@@ -723,15 +722,15 @@ class CheetahPythonLexer(Lexer):
 
 class CheetahLexer(RegexLexer):
     """
-    Generic `cheetah templates`_ lexer. Code that isn't Cheetah
+    Generic cheetah templates lexer. Code that isn't Cheetah
     markup is yielded as `Token.Other`.  This also works for
     `spitfire templates`_ which use the same syntax.
 
-    .. _cheetah templates: http://www.cheetahtemplate.org/
     .. _spitfire templates: http://code.google.com/p/spitfire/
     """
 
     name = 'Cheetah'
+    url = 'http://www.cheetahtemplate.org/'
     aliases = ['cheetah', 'spitfire']
     filenames = ['*.tmpl', '*.spt']
     mimetypes = ['application/x-cheetah', 'application/x-spitfire']
@@ -800,8 +799,8 @@ class CheetahJavascriptLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Cheetah'
-    aliases = ['js+cheetah', 'javascript+cheetah',
-               'js+spitfire', 'javascript+spitfire']
+    aliases = ['javascript+cheetah', 'js+cheetah',
+               'javascript+spitfire', 'js+spitfire']
     mimetypes = ['application/x-javascript+cheetah',
                  'text/x-javascript+cheetah',
                  'text/javascript+cheetah',
@@ -815,11 +814,11 @@ class CheetahJavascriptLexer(DelegatingLexer):
 
 class GenshiTextLexer(RegexLexer):
     """
-    A lexer that highlights `genshi <http://genshi.edgewall.org/>`_ text
-    templates.
+    A lexer that highlights genshi text templates.
     """
 
     name = 'Genshi Text'
+    url = 'http://genshi.edgewall.org/'
     aliases = ['genshitext']
     mimetypes = ['application/x-genshi-text', 'text/x-genshi']
 
@@ -1028,7 +1027,7 @@ class XmlErbLexer(DelegatingLexer):
     """
 
     name = 'XML+Ruby'
-    aliases = ['xml+erb', 'xml+ruby']
+    aliases = ['xml+ruby', 'xml+erb']
     alias_filenames = ['*.xml']
     mimetypes = ['application/xml+ruby']
 
@@ -1048,7 +1047,7 @@ class CssErbLexer(DelegatingLexer):
     """
 
     name = 'CSS+Ruby'
-    aliases = ['css+erb', 'css+ruby']
+    aliases = ['css+ruby', 'css+erb']
     alias_filenames = ['*.css']
     mimetypes = ['text/css+ruby']
 
@@ -1066,7 +1065,7 @@ class JavascriptErbLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Ruby'
-    aliases = ['js+erb', 'javascript+erb', 'js+ruby', 'javascript+ruby']
+    aliases = ['javascript+ruby', 'js+ruby', 'javascript+erb', 'js+erb']
     alias_filenames = ['*.js']
     mimetypes = ['application/x-javascript+ruby',
                  'text/x-javascript+ruby',
@@ -1149,7 +1148,7 @@ class JavascriptPhpLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+PHP'
-    aliases = ['js+php', 'javascript+php']
+    aliases = ['javascript+php', 'js+php']
     alias_filenames = ['*.js']
     mimetypes = ['application/x-javascript+php',
                  'text/x-javascript+php',
@@ -1231,7 +1230,7 @@ class JavascriptSmartyLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Smarty'
-    aliases = ['js+smarty', 'javascript+smarty']
+    aliases = ['javascript+smarty', 'js+smarty']
     alias_filenames = ['*.js', '*.tpl']
     mimetypes = ['application/x-javascript+smarty',
                  'text/x-javascript+smarty',
@@ -1254,6 +1253,7 @@ class HtmlDjangoLexer(DelegatingLexer):
 
     name = 'HTML+Django/Jinja'
     aliases = ['html+django', 'html+jinja', 'htmldjango']
+    filenames = ['*.html.j2', '*.htm.j2', '*.xhtml.j2', '*.html.jinja2', '*.htm.jinja2', '*.xhtml.jinja2']
     alias_filenames = ['*.html', '*.htm', '*.xhtml']
     mimetypes = ['text/html+django', 'text/html+jinja']
 
@@ -1275,6 +1275,7 @@ class XmlDjangoLexer(DelegatingLexer):
 
     name = 'XML+Django/Jinja'
     aliases = ['xml+django', 'xml+jinja']
+    filenames = ['*.xml.j2', '*.xml.jinja2']
     alias_filenames = ['*.xml']
     mimetypes = ['application/xml+django', 'application/xml+jinja']
 
@@ -1296,6 +1297,7 @@ class CssDjangoLexer(DelegatingLexer):
 
     name = 'CSS+Django/Jinja'
     aliases = ['css+django', 'css+jinja']
+    filenames = ['*.css.j2', '*.css.jinja2']
     alias_filenames = ['*.css']
     mimetypes = ['text/css+django', 'text/css+jinja']
 
@@ -1313,8 +1315,9 @@ class JavascriptDjangoLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Django/Jinja'
-    aliases = ['js+django', 'javascript+django',
-               'js+jinja', 'javascript+jinja']
+    aliases = ['javascript+django', 'js+django',
+               'javascript+jinja', 'js+jinja']
+    filenames = ['*.js.j2', '*.js.jinja2']
     alias_filenames = ['*.js']
     mimetypes = ['application/x-javascript+django',
                  'application/x-javascript+jinja',
@@ -1406,7 +1409,7 @@ class EvoqueLexer(RegexLexer):
             # see doc for handling first name arg: /directives/evoque/
             # + minor inconsistency: the "name" in e.g. $overlay{name=site_base}
             # should be using(PythonLexer), not passed out as String
-            (r'(\$)(evoque|overlay)(\{(%)?)(\s*[#\w\-"\'.]+[^=,%}]+?)?'
+            (r'(\$)(evoque|overlay)(\{(%)?)(\s*[#\w\-"\'.]+)?'
              r'(.*?)((?(4)%)\})',
              bygroups(Punctuation, Name.Builtin, Punctuation, None,
                       String, using(PythonLexer), Punctuation)),
@@ -1430,6 +1433,10 @@ class EvoqueLexer(RegexLexer):
         ],
     }
 
+    def analyse_text(text):
+        """Evoque templates use $evoque, which is unique."""
+        if '$evoque' in text:
+            return 1
 
 class EvoqueHtmlLexer(DelegatingLexer):
     """
@@ -1446,6 +1453,9 @@ class EvoqueHtmlLexer(DelegatingLexer):
     def __init__(self, **options):
         super().__init__(HtmlLexer, EvoqueLexer, **options)
 
+    def analyse_text(text):
+        return EvoqueLexer.analyse_text(text)
+
 
 class EvoqueXmlLexer(DelegatingLexer):
     """
@@ -1461,6 +1471,9 @@ class EvoqueXmlLexer(DelegatingLexer):
 
     def __init__(self, **options):
         super().__init__(XmlLexer, EvoqueLexer, **options)
+
+    def analyse_text(text):
+        return EvoqueLexer.analyse_text(text)
 
 
 class ColdfusionLexer(RegexLexer):
@@ -1726,7 +1739,7 @@ class LassoCssLexer(DelegatingLexer):
 
     def analyse_text(text):
         rv = LassoLexer.analyse_text(text) - 0.05
-        if re.search(r'\w+:.+?;', text):
+        if re.search(r'\w+:[^;]+;', text):
             rv += 0.1
         if 'padding:' in text:
             rv += 0.1
@@ -1742,7 +1755,7 @@ class LassoJavascriptLexer(DelegatingLexer):
     """
 
     name = 'JavaScript+Lasso'
-    aliases = ['js+lasso', 'javascript+lasso']
+    aliases = ['javascript+lasso', 'js+lasso']
     alias_filenames = ['*.js']
     mimetypes = ['application/x-javascript+lasso',
                  'text/x-javascript+lasso',
@@ -1759,7 +1772,7 @@ class LassoJavascriptLexer(DelegatingLexer):
 
 class HandlebarsLexer(RegexLexer):
     """
-    Generic `handlebars <http://handlebarsjs.com/>` template lexer.
+    Generic handlebars template lexer.
 
     Highlights only the Handlebars template tags (stuff between `{{` and `}}`).
     Everything else is left for a delegating lexer.
@@ -1768,6 +1781,7 @@ class HandlebarsLexer(RegexLexer):
     """
 
     name = "Handlebars"
+    url = 'https://handlebarsjs.com/'
     aliases = ['handlebars']
 
     tokens = {
@@ -1825,8 +1839,8 @@ class HandlebarsLexer(RegexLexer):
             include('variable'),
 
             # borrowed from DjangoLexer
-            (r':?"(\\\\|\\"|[^"])*"', String.Double),
-            (r":?'(\\\\|\\'|[^'])*'", String.Single),
+            (r':?"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r":?'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r"[0-9](\.[0-9]*)?(eE[+-][0-9])?[flFLdD]?|"
              r"0[xX][0-9a-fA-F]+[Ll]?", Number),
         ]
@@ -1862,7 +1876,7 @@ class YamlJinjaLexer(DelegatingLexer):
 
     name = 'YAML+Jinja'
     aliases = ['yaml+jinja', 'salt', 'sls']
-    filenames = ['*.sls']
+    filenames = ['*.sls', '*.yaml.j2', '*.yml.j2', '*.yaml.jinja2', '*.yml.jinja2']
     mimetypes = ['text/x-yaml+jinja', 'text/x-sls']
 
     def __init__(self, **options):
@@ -1871,12 +1885,12 @@ class YamlJinjaLexer(DelegatingLexer):
 
 class LiquidLexer(RegexLexer):
     """
-    Lexer for `Liquid templates
-    <http://www.rubydoc.info/github/Shopify/liquid>`_.
+    Lexer for Liquid templates.
 
     .. versionadded:: 2.0
     """
     name = 'liquid'
+    url = 'https://www.rubydoc.info/github/Shopify/liquid'
     aliases = ['liquid']
     filenames = ['*.liquid']
 
@@ -2077,7 +2091,7 @@ class LiquidLexer(RegexLexer):
 
 class TwigLexer(RegexLexer):
     """
-    `Twig <http://twig.sensiolabs.org/>`_ template lexer.
+    Twig template lexer.
 
     It just highlights Twig code between the preprocessor directives,
     other data is left untouched by the lexer.
@@ -2138,8 +2152,8 @@ class TwigLexer(RegexLexer):
             (_ident_inner, Name.Variable),
             (r'\.' + _ident_inner, Name.Variable),
             (r'\.[0-9]+', Number),
-            (r':?"(\\\\|\\"|[^"])*"', String.Double),
-            (r":?'(\\\\|\\'|[^'])*'", String.Single),
+            (r':?"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r":?'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r'([{}()\[\]+\-*/,:~%]|\.\.|\?|:|\*\*|\/\/|!=|[><=]=?)', Operator),
             (r"[0-9](\.[0-9]*)?(eE[+-][0-9])?[flFLdD]?|"
              r"0[xX][0-9a-fA-F]+[Ll]?", Number),
@@ -2177,9 +2191,7 @@ class TwigHtmlLexer(DelegatingLexer):
 
 class Angular2Lexer(RegexLexer):
     """
-    Generic
-    `angular2 <http://victorsavkin.com/post/119943127151/angular-2-template-syntax>`_
-    template lexer.
+    Generic angular2 template lexer.
 
     Highlights only the Angular template tags (stuff between `{{` and `}}` and
     special attributes: '(event)=', '[property]=', '[(twoWayBinding)]=').
@@ -2189,6 +2201,7 @@ class Angular2Lexer(RegexLexer):
     """
 
     name = "Angular2"
+    url = 'https://angular.io/guide/template-syntax'
     aliases = ['ng2']
 
     tokens = {
@@ -2218,8 +2231,8 @@ class Angular2Lexer(RegexLexer):
 
             # Literals
             (r':?(true|false)', String.Boolean),
-            (r':?"(\\\\|\\"|[^"])*"', String.Double),
-            (r":?'(\\\\|\\'|[^'])*'", String.Single),
+            (r':?"(\\\\|\\[^\\]|[^"\\])*"', String.Double),
+            (r":?'(\\\\|\\[^\\]|[^'\\])*'", String.Single),
             (r"[0-9](\.[0-9]*)?(eE[+-][0-9])?[flFLdD]?|"
              r"0[xX][0-9a-fA-F]+[Ll]?", Number),
 
@@ -2253,3 +2266,31 @@ class Angular2HtmlLexer(DelegatingLexer):
 
     def __init__(self, **options):
         super().__init__(HtmlLexer, Angular2Lexer, **options)
+
+
+class SqlJinjaLexer(DelegatingLexer):
+    """
+    Templated SQL lexer.
+
+    .. versionadded:: 2.13
+    """
+
+    name = 'SQL+Jinja'
+    aliases = ['sql+jinja']
+    filenames = ['*.sql', '*.sql.j2', '*.sql.jinja2']
+
+    def __init__(self, **options):
+        super().__init__(SqlLexer, DjangoLexer, **options)
+
+    def analyse_text(text):
+        rv = 0.0
+        # dbt's ref function
+        if re.search(r'\{\{\s*ref\(.*\)\s*\}\}', text):
+            rv += 0.4
+        # dbt's source function
+        if re.search(r'\{\{\s*source\(.*\)\s*\}\}', text):
+            rv += 0.25
+        # Jinja macro
+        if re.search(r'\{%-?\s*macro \w+\(.*\)\s*-?%\}', text):
+            rv += 0.15
+        return rv

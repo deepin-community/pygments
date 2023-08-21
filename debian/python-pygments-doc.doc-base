@@ -1,0 +1,10 @@
+Document: python-pygments-doc
+Title: Pygments Documentation
+Abstract: This is the documentation of Pygments, a generic syntax highlighter
+ suitable for use in code hosting, forums, wikis or other applications that need
+ to prettify source code.
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-pygments-doc/html/index.html
+Files: /usr/share/doc/python-pygments-doc/html/*.html

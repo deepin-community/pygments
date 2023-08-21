@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.zig
     ~~~~~~~~~~~~~~~~~~~
 
     Lexers for Zig.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -18,11 +17,12 @@ __all__ = ['ZigLexer']
 
 class ZigLexer(RegexLexer):
     """
-    For `Zig <http://www.ziglang.org>`_ source code.
+    Lexer for the Zig language.
 
     grammar: https://ziglang.org/documentation/master/#Grammar
     """
     name = 'Zig'
+    url = 'http://www.ziglang.org'
     aliases = ['zig']
     filenames = ['*.zig']
     mimetypes = ['text/zig']

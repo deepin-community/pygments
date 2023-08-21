@@ -1,0 +1,22 @@
+From: =?utf-8?q?Piotr_O=C5=BCarowski?= <piotr@debian.org>
+Date: Mon, 31 Dec 2018 12:36:56 +0100
+Subject: docs: moved to python-pygments-doc binary package
+
+Forwarded: not-needed
+---
+ doc/pygmentize.1 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/pygmentize.1 b/doc/pygmentize.1
+index 5ac8fe6..85d44f8 100644
+--- a/doc/pygmentize.1
++++ b/doc/pygmentize.1
+@@ -104,7 +104,7 @@ Show help screen.
+ .B \-V
+ Show version of the Pygments package.
+ .SH SEE ALSO
+-/usr/share/doc/python-pygments/index.html
++/usr/share/doc/python-pygments-doc/index.html
+ .SH AUTHOR
+ pygmentize was written by Georg Brandl <g.brandl@gmx.net>.
+ .PP
