@@ -2,20 +2,36 @@ Source: pygments
 Section: python
 Priority: optional
 Maintainer: Piotr Ożarowski <piotr@debian.org>
-Uploaders: Debian Python Team <team+python@tracker.debian.org>
-Build-Depends: debhelper-compat (= 13)
+Uploaders: Debian Python Team <team+python@tracker.debian.org>,
+Build-Depends: debhelper-compat (= 13),
 Build-Depends-Indep: dh-python,
-                     python3-all,
-                     python3-docutils,
-                     python3-jinja2,
-                     python3-pytest <!nocheck>,
-                     python3-setuptools,
-                     python3-sphinx,
-Standards-Version: 4.5.0
+ pybuild-plugin-pyproject,
+ python3-all,
+ python3-docutils,
+ python3-jinja2,
+ python3-lxml,
+ python3-pytest (>= 7) <!nocheck>,
+ python3-setuptools,
+ python3-sphinx,
+ python3-wcag-contrast-ratio,
+Standards-Version: 4.6.2
 Rules-Requires-Root: no
-Homepage: http://pygments.org/
+Homepage: https://pygments.org/
 Vcs-Git: https://salsa.debian.org/python-team/packages/pygments.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/pygments
+
+Package: python-pygments-doc
+Section: doc
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         ${sphinxdoc:Depends},
+Recommends: python3-pygments,
+Description: documentation for the Pygments
+ Pygments is syntax highlighting package.
+ .
+ This package contains the documentation for Pygments in HTML and
+ reStructuredText format.
 
 Package: python3-pygments
 Architecture: all
@@ -25,8 +41,8 @@ Depends: python3-pkg-resources,
          ${python3:Depends},
 Suggests: python-pygments-doc,
           ttf-bitstream-vera,
-Breaks: python-pygments (<< 2.3.1+dfsg-4~)
-Replaces: python-pygments (<< 2.3.1+dfsg-4~)
+Breaks: python-pygments (<< 2.3.1+dfsg-4~),
+Replaces: python-pygments (<< 2.3.1+dfsg-4~),
 Description: syntax highlighting package written in Python 3
  Pygments aims to be a generic syntax highlighter for general use in all kinds
  of software such as forum systems, wikis or other applications that need to
@@ -38,17 +54,3 @@ Description: syntax highlighting package written in Python 3
    * support for new languages and formats are added easily
    * a number of output formats, presently HTML, LaTeX and ANSI sequences
    * it is usable as a command-line tool and as a library
-
-Package: python-pygments-doc
-Section: doc
-Architecture: all
-Multi-Arch: foreign
-Depends: ${misc:Depends},
-         ${sphinxdoc:Depends},
-Recommends: python3-pygments,
-Conflicts: python-pygments (<= 2.0~),
-Description: documentation for the Pygments
- Pygments is syntax highlighting package.
- .
- This package contains the documentation for Pygments in HTML and
- reStructuredText format.

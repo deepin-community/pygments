@@ -1,0 +1,19 @@
+From: Carsten Schoenert <c.schoenert@t-online.de>
+Date: Mon, 14 Feb 2022 17:51:56 +0100
+Subject: pygments.bashcomp: Remove hashbang within bash-completion
+
+This completion script isn't needing any hashbang as it's not intended
+to get executed directly.
+---
+ external/pygments.bashcomp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/external/pygments.bashcomp b/external/pygments.bashcomp
+index 1299fdb..2f802d6 100644
+--- a/external/pygments.bashcomp
++++ b/external/pygments.bashcomp
+@@ -1,4 +1,3 @@
+-#!bash
+ #
+ # Bash completion support for Pygments (the 'pygmentize' command).
+ #

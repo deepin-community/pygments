@@ -1,3 +1,109 @@
+pygments (2.15.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Piotr Ożarowski <piotr@debian.org>  Wed, 19 Apr 2023 10:06:40 +0200
+
+pygments (2.15.0+dfsg-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Piotr Ożarowski <piotr@debian.org>  Sat, 15 Apr 2023 15:01:42 +0200
+
+pygments (2.14.0+dfsg-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 2.14.0+dfsg
+  * d/copyright: Update year data
+  * d/control: Bump Standards-Version to 4.6.2
+    No further changes needed.
+
+ -- Carsten Schoenert <c.schoenert@t-online.de>  Sat, 07 Jan 2023 10:12:03 +0100
+
+pygments (2.13.0+dfsg-1) unstable; urgency=medium
+
+  * Team upload
+  * d/gbp.conf: Adjust back to debian/master
+    In order to make things work as expected.
+  * New upstream version 2.13.0+dfsg
+
+ -- Carsten Schoenert <c.schoenert@t-online.de>  Sun, 20 Nov 2022 17:35:38 +0100
+
+pygments (2.12.0+dfsg-2) unstable; urgency=medium
+
+  * debian/control
+    - remove debian/exp.. branch from Vcs fields
+    - adjust pytest b-d versioned relationship
+    - run wrap-and-sort -at
+
+ -- Sandro Tosi <morph@debian.org>  Mon, 27 Jun 2022 21:34:45 -0400
+
+pygments (2.12.0+dfsg-1) unstable; urgency=medium
+
+  * upload to unstable
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 23 Jun 2022 22:52:47 -0400
+
+pygments (2.12.0+dfsg-1~exp1) experimental; urgency=medium
+
+  * Team upload
+  * d/gbp.conf: Adjust to debian/experimental
+  * New upstream version 2.12.0+dfsg
+  * d/control: Increase required version on package pytest
+  * d/control: Bump Standards-Version to 4.6.1
+  * d/control: Adjust VCS linking to debian/experimental
+  * d/control: Use https within upstream URI
+  * d/control: Sort binary packages alphabetical
+  * d/python3-pygments.dirs: Ensure bash-completion folder exits
+  * d/rules: Ignore bash-completion within python-pygments-doc
+
+ -- Carsten Schoenert <c.schoenert@t-online.de>  Sat, 11 Jun 2022 08:39:00 +0200
+
+pygments (2.11.2+dfsg-2) unstable; urgency=medium
+
+  * Team upload
+  * autopkgtest: Adjust B-D for autopkgtest
+
+ -- Carsten Schoenert <c.schoenert@t-online.de>  Tue, 15 Feb 2022 12:37:08 +0100
+
+pygments (2.11.2+dfsg-1) unstable; urgency=medium
+
+  * Team upload
+  * d/gbp.conf: Add content to filter out
+  * New upstream version 2.11.2+dfsg
+  * d/control: Extend packages for Build-Depends
+    - The new upstream version requires now python3-lxml and
+      python3-wcag-contrast-ratio.
+  * d/*control: Running wrap-and-sort -ast
+    - No functional modifications.
+  * Rebuild patch queue from patch-queue branch
+    - Added patch:
+      0002-pygments.bashcomp-Remove-hashbang-within-bash-comple.patch
+  * d/copyright: Update copyright year
+  * d/control: Remove obsolete Conflicts for python-pygments
+  * d/python-pygments-doc.doc-base: Add new sequencer file
+
+ -- Carsten Schoenert <c.schoenert@t-online.de>  Mon, 14 Feb 2022 18:50:39 +0100
+
+pygments (2.10.0+dfsg-1) unstable; urgency=medium
+
+  * New upstream release; Closes: #984625
+  * debian/copyright
+    - update upstream copyright notice
+  * debian/patchees/
+    - refresh patches, remove patches released upstream
+  * debian/rules
+    - exclude more tests that rely on example data that's removed
+    - convert to dh sequence
+  * debian/tests/python3-pygments
+    - exclude more tests that rely on example data that's removed
+  * debian/patches/0003-Update-change-docs-theme-patch.patch
+    - drop patch, no longer needed
+  * debian/control
+    - bump Standards-Version to 4.6.0.1 (no changes needed)
+
+ -- Sandro Tosi <morph@debian.org>  Fri, 10 Dec 2021 00:46:37 -0500
+
 pygments (2.7.1+dfsg-2.1) unstable; urgency=medium
 
   * Non-maintainer upload.

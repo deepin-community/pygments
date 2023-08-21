@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 """
     pygments.formatters.latex
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Formatter for LaTeX fancyvrb output.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
 from io import StringIO
 
 from pygments.formatter import Formatter
-from pygments.lexer import Lexer
+from pygments.lexer import Lexer, do_insertions
 from pygments.token import Token, STANDARD_TYPES
 from pygments.util import get_bool_opt, get_int_opt
 
@@ -160,6 +159,8 @@ class LatexFormatter(Formatter):
             \PY{k}{pass}
         \end{Verbatim}
 
+    Wrapping can be disabled using the `nowrap` option.
+
     The special command used here (``\PY``) and all the other macros it needs
     are output by the `get_style_defs` method.
 
@@ -171,6 +172,11 @@ class LatexFormatter(Formatter):
     ``Verbatim`` environments.
 
     Additional options accepted:
+
+    `nowrap`
+        If set to ``True``, don't wrap the tokens at all, not even inside a
+        ``\begin{Verbatim}`` environment. This disables most other options
+        (default: ``False``).
 
     `style`
         The style to use, can be a string or a Style subclass (default:
@@ -249,6 +255,7 @@ class LatexFormatter(Formatter):
 
     def __init__(self, **options):
         Formatter.__init__(self, **options)
+        self.nowrap = get_bool_opt(options, 'nowrap', False)
         self.docclass = options.get('docclass', 'article')
         self.preamble = options.get('preamble', '')
         self.linenos = get_bool_opt(options, 'linenos', False)
@@ -300,13 +307,13 @@ class LatexFormatter(Formatter):
                 cmndef += (r'\def\$$@tc##1{\textcolor[rgb]{%s}{##1}}' %
                            rgbcolor(ndef['color']))
             if ndef['border']:
-                cmndef += (r'\def\$$@bc##1{\setlength{\fboxsep}{0pt}'
-                           r'\fcolorbox[rgb]{%s}{%s}{\strut ##1}}' %
+                cmndef += (r'\def\$$@bc##1{{\setlength{\fboxsep}{\string -\fboxrule}'
+                           r'\fcolorbox[rgb]{%s}{%s}{\strut ##1}}}' %
                            (rgbcolor(ndef['border']),
                             rgbcolor(ndef['bgcolor'])))
             elif ndef['bgcolor']:
-                cmndef += (r'\def\$$@bc##1{\setlength{\fboxsep}{0pt}'
-                           r'\colorbox[rgb]{%s}{\strut ##1}}' %
+                cmndef += (r'\def\$$@bc##1{{\setlength{\fboxsep}{0pt}'
+                           r'\colorbox[rgb]{%s}{\strut ##1}}}' %
                            rgbcolor(ndef['bgcolor']))
             if cmndef == '':
                 continue
@@ -322,8 +329,7 @@ class LatexFormatter(Formatter):
         cp = self.commandprefix
         styles = []
         for name, definition in self.cmd2def.items():
-            styles.append(r'\expandafter\def\csname %s@tok@%s\endcsname{%s}' %
-                          (cp, name, definition))
+            styles.append(r'\@namedef{%s@tok@%s}{%s}' % (cp, name, definition))
         return STYLE_TEMPLATE % {'cp': self.commandprefix,
                                  'styles': '\n'.join(styles)}
 
@@ -336,17 +342,19 @@ class LatexFormatter(Formatter):
             realoutfile = outfile
             outfile = StringIO()
 
-        outfile.write('\\begin{' + self.envname + '}[commandchars=\\\\\\{\\}')
-        if self.linenos:
-            start, step = self.linenostart, self.linenostep
-            outfile.write(',numbers=left' +
-                          (start and ',firstnumber=%d' % start or '') +
-                          (step and ',stepnumber=%d' % step or ''))
-        if self.mathescape or self.texcomments or self.escapeinside:
-            outfile.write(',codes={\\catcode`\\$=3\\catcode`\\^=7\\catcode`\\_=8}')
-        if self.verboptions:
-            outfile.write(',' + self.verboptions)
-        outfile.write(']\n')
+        if not self.nowrap:
+            outfile.write('\\begin{' + self.envname + '}[commandchars=\\\\\\{\\}')
+            if self.linenos:
+                start, step = self.linenostart, self.linenostep
+                outfile.write(',numbers=left' +
+                              (start and ',firstnumber=%d' % start or '') +
+                              (step and ',stepnumber=%d' % step or ''))
+            if self.mathescape or self.texcomments or self.escapeinside:
+                outfile.write(',codes={\\catcode`\\$=3\\catcode`\\^=7'
+                              '\\catcode`\\_=8\\relax}')
+            if self.verboptions:
+                outfile.write(',' + self.verboptions)
+            outfile.write(']\n')
 
         for ttype, value in tokensource:
             if ttype in Token.Comment:
@@ -409,7 +417,8 @@ class LatexFormatter(Formatter):
             else:
                 outfile.write(value)
 
-        outfile.write('\\end{' + self.envname + '}\n')
+        if not self.nowrap:
+            outfile.write('\\end{' + self.envname + '}\n')
 
         if self.full:
             encoding = self.encoding or 'utf8'
@@ -446,12 +455,44 @@ class LatexEmbeddedLexer(Lexer):
         Lexer.__init__(self, **options)
 
     def get_tokens_unprocessed(self, text):
+        # find and remove all the escape tokens (replace with an empty string)
+        # this is very similar to DelegatingLexer.get_tokens_unprocessed.
+        buffered = ''
+        insertions = []
+        insertion_buf = []
+        for i, t, v in self._find_safe_escape_tokens(text):
+            if t is None:
+                if insertion_buf:
+                    insertions.append((len(buffered), insertion_buf))
+                    insertion_buf = []
+                buffered += v
+            else:
+                insertion_buf.append((i, t, v))
+        if insertion_buf:
+            insertions.append((len(buffered), insertion_buf))
+        return do_insertions(insertions,
+                             self.lang.get_tokens_unprocessed(buffered))
+
+    def _find_safe_escape_tokens(self, text):
+        """ find escape tokens that are not in strings or comments """
+        for i, t, v in self._filter_to(
+            self.lang.get_tokens_unprocessed(text),
+            lambda t: t in Token.Comment or t in Token.String
+        ):
+            if t is None:
+                for i2, t2, v2 in self._find_escape_tokens(v):
+                    yield i + i2, t2, v2
+            else:
+                yield i, None, v
+
+    def _filter_to(self, it, pred):
+        """ Keep only the tokens that match `pred`, merge the others together """
         buf = ''
         idx = 0
-        for i, t, v in self.lang.get_tokens_unprocessed(text):
-            if t in Token.Comment or t in Token.String:
+        for i, t, v in it:
+            if pred(t):
                 if buf:
-                    yield from self.get_tokens_aux(idx, buf)
+                    yield idx, None, buf
                     buf = ''
                 yield i, t, v
             else:
@@ -459,15 +500,16 @@ class LatexEmbeddedLexer(Lexer):
                     idx = i
                 buf += v
         if buf:
-            yield from self.get_tokens_aux(idx, buf)
+            yield idx, None, buf
 
-    def get_tokens_aux(self, index, text):
+    def _find_escape_tokens(self, text):
+        """ Find escape tokens within text, give token=None otherwise """
+        index = 0
         while text:
             a, sep1, text = text.partition(self.left)
             if a:
-                for i, t, v in self.lang.get_tokens_unprocessed(a):
-                    yield index + i, t, v
-                    index += len(a)
+                yield index, None, a
+                index += len(a)
             if sep1:
                 b, sep2, text = text.partition(self.right)
                 if sep2:

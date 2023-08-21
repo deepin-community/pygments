@@ -1,2 +1,7 @@
 Tests: python3-pygments
-Depends: python3-all, python3-pygments, python3-pytest
+Depends:
+ python3-all,
+ python3-lxml,
+ python3-pygments,
+ python3-pytest,
+ python3-wcag-contrast-ratio,

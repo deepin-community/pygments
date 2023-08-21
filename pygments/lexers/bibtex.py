@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.bibtex
     ~~~~~~~~~~~~~~~~~~~~~~
 
     Lexers for BibTeX bibliography data and styles
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -13,8 +12,8 @@ import re
 
 from pygments.lexer import RegexLexer, ExtendedRegexLexer, include, default, \
     words
-from pygments.token import Name, Comment, String, Error, Number, Text, \
-    Keyword, Punctuation
+from pygments.token import Name, Comment, String, Error, Number, Keyword, \
+    Punctuation, Whitespace
 
 __all__ = ['BibTeXLexer', 'BSTLexer']
 
@@ -27,7 +26,7 @@ class BibTeXLexer(ExtendedRegexLexer):
     """
 
     name = 'BibTeX'
-    aliases = ['bib', 'bibtex']
+    aliases = ['bibtex', 'bib']
     filenames = ['*.bib']
     mimetypes = ["text/x-bibtex"]
     flags = re.IGNORECASE
@@ -56,7 +55,7 @@ class BibTeXLexer(ExtendedRegexLexer):
     tokens = {
         'root': [
             include('whitespace'),
-            ('@comment', Comment),
+            (r'@comment(?!ary)', Comment),
             ('@preamble', Name.Class, ('closing-brace', 'value', 'opening-brace')),
             ('@string', Name.Class, ('closing-brace', 'field', 'opening-brace')),
             ('@' + IDENTIFIER, Name.Class,
@@ -109,7 +108,7 @@ class BibTeXLexer(ExtendedRegexLexer):
             (r'[^\{\}]+', String),
         ],
         'whitespace': [
-            (r'\s+', Text),
+            (r'\s+', Whitespace),
         ],
     }
 
@@ -154,7 +153,7 @@ class BSTLexer(RegexLexer):
             default('#pop'),
         ],
         'whitespace': [
-            (r'\s+', Text),
-            ('%.*?$', Comment.SingleLine),
+            (r'\s+', Whitespace),
+            ('%.*?$', Comment.Single),
         ],
     }

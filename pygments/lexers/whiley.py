@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.whiley
     ~~~~~~~~~~~~~~~~~~~~~~
 
     Lexers for the Whiley language.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -23,6 +22,7 @@ class WhileyLexer(RegexLexer):
     .. versionadded:: 2.2
     """
     name = 'Whiley'
+    url = 'http://whiley.org/'
     filenames = ['*.whiley']
     aliases = ['whiley']
     mimetypes = ['text/x-whiley']

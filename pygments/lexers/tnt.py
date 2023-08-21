@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     pygments.lexers.tnt
     ~~~~~~~~~~~~~~~~~~~
 
     Lexer for Typographic Number Theory.
 
-    :copyright: Copyright 2006-2020 by the Pygments team, see AUTHORS.
+    :copyright: Copyright 2006-2023 by the Pygments team, see AUTHORS.
     :license: BSD, see LICENSE for details.
 """
 
@@ -21,14 +20,13 @@ __all__ = ['TNTLexer']
 class TNTLexer(Lexer):
     """
     Lexer for Typographic Number Theory, as described in the book
-    Gödel, Escher, Bach, by Douglas R. Hofstadter,
-    or as summarized here:
-    https://github.com/Kenny2github/language-tnt/blob/master/README.md#summary-of-tnt
+    Gödel, Escher, Bach, by Douglas R. Hofstadter
 
     .. versionadded:: 2.7
     """
 
     name = 'Typographic Number Theory'
+    url = 'https://github.com/Kenny2github/language-tnt'
     aliases = ['tnt']
     filenames = ['*.tnt']
 
@@ -55,6 +53,10 @@ class TNTLexer(Lexer):
     LINENOS = re.compile(r'(?:[0-9]+)(?:(?:, ?|,? and )(?:[0-9]+))*')
     COMMENT = re.compile(r'\[[^\n\]]+\]')
 
+    def __init__(self, *args, **kwargs):
+        Lexer.__init__(self, *args, **kwargs)
+        self.cur = []
+
     def whitespace(self, start, text, required=False):
         """Tokenize whitespace."""
         end = start
@@ -63,15 +65,16 @@ class TNTLexer(Lexer):
                 end += 1
         except IndexError:
             end = len(text)
-        if required:
-            assert end != start
+        if required and end == start:
+            raise AssertionError
         if end != start:
             self.cur.append((start, Text, text[start:end]))
         return end
 
     def variable(self, start, text):
         """Tokenize a variable."""
-        assert text[start] in self.VARIABLES
+        if text[start] not in self.VARIABLES:
+            raise AssertionError
         end = start+1
         while text[end] in self.PRIMES:
             end += 1
@@ -94,19 +97,18 @@ class TNTLexer(Lexer):
         if text[start] == '(':  # (...+...)
             self.cur.append((start, Punctuation, text[start]))
             start = self.term(start+1, text)
-            assert text[start] in self.OPERATORS
+            if text[start] not in self.OPERATORS:
+                raise AssertionError
             self.cur.append((start, Operator, text[start]))
             start = self.term(start+1, text)
-            assert text[start] == ')'
+            if text[start] != ')':
+                raise AssertionError
             self.cur.append((start, Punctuation, text[start]))
             return start+1
         raise AssertionError  # no matches
 
     def formula(self, start, text):
         """Tokenize a formula."""
-        if text[start] in '[]':  # fantasy push or pop
-            self.cur.append((start, Keyword, text[start]))
-            return start+1
         if text[start] in self.NEGATORS:  # ~<...>
             end = start+1
             while text[end] in self.NEGATORS:
@@ -116,21 +118,25 @@ class TNTLexer(Lexer):
         if text[start] in self.QUANTIFIERS:  # Aa:<...>
             self.cur.append((start, Keyword.Declaration, text[start]))
             start = self.variable(start+1, text)
-            assert text[start] == ':'
+            if text[start] != ':':
+                raise AssertionError
             self.cur.append((start, Punctuation, text[start]))
             return self.formula(start+1, text)
         if text[start] == '<':  # <...&...>
             self.cur.append((start, Punctuation, text[start]))
             start = self.formula(start+1, text)
-            assert text[start] in self.LOGIC
+            if text[start] not in self.LOGIC:
+                raise AssertionError
             self.cur.append((start, Operator, text[start]))
             start = self.formula(start+1, text)
-            assert text[start] == '>'
+            if text[start] != '>':
+                raise AssertionError
             self.cur.append((start, Punctuation, text[start]))
             return start+1
         # ...=...
         start = self.term(start, text)
-        assert text[start] == '='
+        if text[start] != '=':
+            raise AssertionError
         self.cur.append((start, Operator, text[start]))
         start = self.term(start+1, text)
         return start
@@ -138,7 +144,8 @@ class TNTLexer(Lexer):
     def rule(self, start, text):
         """Tokenize a rule."""
         match = self.RULES.match(text, start)
-        assert match is not None
+        if match is None:
+            raise AssertionError
         groups = sorted(match.regs[1:])  # exclude whole match
         for group in groups:
             if group[0] >= 0:  # this group matched
@@ -154,7 +161,7 @@ class TNTLexer(Lexer):
         return match.end()
 
     def lineno(self, start, text):
-        """Tokenize a line marker."""
+        """Tokenize a line referral."""
         end = start
         while text[end] not in self.NUMBERS:
             end += 1
@@ -162,8 +169,10 @@ class TNTLexer(Lexer):
         self.cur.append((start+1, Text, text[start+1:end]))
         start = end
         match = self.LINENOS.match(text, start)
-        assert match is not None
-        assert text[match.end()] == ')'
+        if match is None:
+            raise AssertionError
+        if text[match.end()] != ')':
+            raise AssertionError
         self.cur.append((match.start(), Number.Integer, match.group(0)))
         self.cur.append((match.end(), Punctuation, text[match.end()]))
         return match.end() + 1
@@ -186,65 +195,77 @@ class TNTLexer(Lexer):
         self.cur = []
         start = end = self.whitespace(0, text)
         while start <= end < len(text):
-            # try line number
-            while text[end] in self.NUMBERS:
-                end += 1
-            if end != start:  # actual number present
-                self.cur.append((start, Number.Integer, text[start:end]))
-                # whitespace is required after a line number
+            try:
+                # try line number
+                while text[end] in self.NUMBERS:
+                    end += 1
+                if end != start:  # actual number present
+                    self.cur.append((start, Number.Integer, text[start:end]))
+                    # whitespace is required after a line number
+                    orig = len(self.cur)
+                    try:
+                        start = end = self.whitespace(end, text, True)
+                    except AssertionError:
+                        del self.cur[orig:]
+                        start = end = self.error_till_line_end(end, text)
+                        continue
+                # at this point it could be a comment
+                match = self.COMMENT.match(text, start)
+                if match is not None:
+                    self.cur.append((start, Comment, text[start:match.end()]))
+                    start = end = match.end()
+                    # anything after the closing bracket is invalid
+                    start = end = self.error_till_line_end(start, text)
+                    # do not attempt to process the rest
+                    continue
+                del match
+                if text[start] in '[]':  # fantasy push or pop
+                    self.cur.append((start, Keyword, text[start]))
+                    start += 1
+                    end += 1
+                else:
+                    # one formula, possibly containing subformulae
+                    orig = len(self.cur)
+                    try:
+                        start = end = self.formula(start, text)
+                    except (AssertionError, RecursionError):  # not well-formed
+                        del self.cur[orig:]
+                        while text[end] not in self.WHITESPACE:
+                            end += 1
+                        self.cur.append((start, Error, text[start:end]))
+                        start = end
+                # skip whitespace after formula
                 orig = len(self.cur)
                 try:
                     start = end = self.whitespace(end, text, True)
                 except AssertionError:
                     del self.cur[orig:]
-                    start = end = self.error_till_line_end(end, text)
+                    start = end = self.error_till_line_end(start, text)
                     continue
-            # at this point it could be a comment
-            match = self.COMMENT.match(text, start)
-            if match is not None:
-                self.cur.append((start, Comment, text[start:match.end()]))
-                start = end = match.end()
-                # anything after the closing bracket is invalid
-                start = end = self.error_till_line_end(start, text)
-                # do not attempt to process the rest
-                continue
-            del match
-            # one formula, possibly containing subformulae
-            orig = len(self.cur)
-            try:
-                start = end = self.formula(start, text)
-            except AssertionError:  # not well-formed
-                del self.cur[orig:]
-                while text[end] not in self.WHITESPACE:
-                    end += 1
-                self.cur.append((start, Error, text[start:end]))
-                start = end
-            # skip whitespace after formula
-            orig = len(self.cur)
-            try:
-                start = end = self.whitespace(end, text, True)
-            except AssertionError:
-                del self.cur[orig:]
-                start = end = self.error_till_line_end(start, text)
-                continue
-            # rule proving this formula a theorem
-            orig = len(self.cur)
-            try:
-                start = end = self.rule(start, text)
-            except AssertionError:
-                del self.cur[orig:]
-                start = end = self.error_till_line_end(start, text)
-                continue
-            # skip whitespace after rule
-            start = end = self.whitespace(end, text)
-            # line marker
-            if text[start] == '(':
+                # rule proving this formula a theorem
                 orig = len(self.cur)
                 try:
-                    start = end = self.lineno(start, text)
+                    start = end = self.rule(start, text)
                 except AssertionError:
                     del self.cur[orig:]
                     start = end = self.error_till_line_end(start, text)
                     continue
-                start = end = self.whitespace(start, text)
+                # skip whitespace after rule
+                start = end = self.whitespace(end, text)
+                # line marker
+                if text[start] == '(':
+                    orig = len(self.cur)
+                    try:
+                        start = end = self.lineno(start, text)
+                    except AssertionError:
+                        del self.cur[orig:]
+                        start = end = self.error_till_line_end(start, text)
+                        continue
+                    start = end = self.whitespace(start, text)
+            except IndexError:
+                try:
+                    del self.cur[orig:]
+                except NameError:
+                    pass  # if orig was never defined, fine
+                self.error_till_line_end(start, text)
         return self.cur

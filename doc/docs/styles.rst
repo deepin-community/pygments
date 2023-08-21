@@ -4,8 +4,8 @@
 Styles
 ======
 
-Pygments comes with some builtin styles that work for both the HTML and
-LaTeX formatter.
+Pygments comes with :doc:`some builtin styles </styles/>` that work for both the
+HTML and LaTeX formatter.
 
 The builtin styles can be looked up with the `get_style_by_name` function:
 
@@ -39,82 +39,7 @@ Or you can also import your own style (which must be a subclass of
 Creating Own Styles
 ===================
 
-So, how to create a style? All you have to do is to subclass `Style` and
-define some styles:
-
-.. sourcecode:: python
-
-    from pygments.style import Style
-    from pygments.token import Keyword, Name, Comment, String, Error, \
-         Number, Operator, Generic
-
-    class YourStyle(Style):
-        default_style = ""
-        styles = {
-            Comment:                'italic #888',
-            Keyword:                'bold #005',
-            Name:                   '#f00',
-            Name.Function:          '#0f0',
-            Name.Class:             'bold #0f0',
-            String:                 'bg:#eee #111'
-        }
-
-That's it. There are just a few rules. When you define a style for `Name`
-the style automatically also affects `Name.Function` and so on. If you
-defined ``'bold'`` and you don't want boldface for a subtoken use ``'nobold'``.
-
-(Philosophy: the styles aren't written in CSS syntax since this way
-they can be used for a variety of formatters.)
-
-`default_style` is the style inherited by all token types.
-
-To make the style usable for Pygments, you must
-
-* either register it as a plugin (see :doc:`the plugin docs <plugins>`)
-* or drop it into the `styles` subpackage of your Pygments distribution one style
-  class per style, where the file name is the style name and the class name is
-  `StylenameClass`. For example, if your style should be called
-  ``"mondrian"``, name the class `MondrianStyle`, put it into the file
-  ``mondrian.py`` and this file into the ``pygments.styles`` subpackage
-  directory.
-
-
-Style Rules
-===========
-
-Here a small overview of all allowed styles:
-
-``bold``
-    render text as bold
-``nobold``
-    don't render text as bold (to prevent subtokens being highlighted bold)
-``italic``
-    render text italic
-``noitalic``
-    don't render text as italic
-``underline``
-    render text underlined
-``nounderline``
-    don't render text underlined
-``bg:``
-    transparent background
-``bg:#000000``
-    background color (black)
-``border:``
-    no border
-``border:#ffffff``
-    border color (white)
-``#ff0000``
-    text color (red)
-``noinherit``
-    don't inherit styles from supertoken
-
-Note that there may not be a space between ``bg:`` and the color value
-since the style definition string is split at whitespace.
-Also, using named colors is not allowed since the supported color names
-vary for different formatters.
-
-Furthermore, not all lexers might support every style.
+See :doc:`styledevelopment`.
 
 
 Builtin Styles
@@ -154,7 +79,7 @@ Terminal Styles
 
 Custom styles used with the 256-color terminal formatter can also map colors to
 use the 8 default ANSI colors.  To do so, use ``ansigreen``, ``ansibrightred`` or
-any other colors defined in :attr:`pygments.style.ansicolors`.  Foreground ANSI
+any other colors defined in :data:`pygments.style.ansicolors`.  Foreground ANSI
 colors will be mapped to the corresponding `escape codes 30 to 37
 <https://en.wikipedia.org/wiki/ANSI_escape_code#Colors>`_ thus respecting any
 custom color mapping and themes provided by many terminal emulators.  Light
