@@ -3,4 +3,4 @@ opts=\
 dversionmangle=s/\+dfsg//,\
 uversionmangle=s/(beta|rc|a|b|c)/~$1/,\
 repacksuffix=+dfsg \
-https://pypi.debian.net/Pygments/Pygments-(.+)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))
+https://pypi.debian.net/Pygments/[Pp]ygments-(.+)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))

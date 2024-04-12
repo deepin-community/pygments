@@ -1,0 +1,23 @@
+From: Stefano Rivera <stefanor@debian.org>
+Date: Sun, 21 Jan 2024 10:21:07 -0400
+Subject: Disable lexer examples in documentation
+
+We strip tests/examplefiles from the source for licensing reasons.
+Disable the code that attempts to include these in documentation.
+---
+ pygments/sphinxext.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pygments/sphinxext.py b/pygments/sphinxext.py
+index f935688..5076eb8 100644
+--- a/pygments/sphinxext.py
++++ b/pygments/sphinxext.py
+@@ -165,7 +165,7 @@ class PygmentsDoc(Directive):
+             if isinstance(docstring, bytes):
+                 docstring = docstring.decode('utf8')
+ 
+-            example_file = getattr(cls, '_example', None)
++            example_file = None  # getattr(cls, '_example', None)
+             if example_file:
+                 p = pathlib.Path(inspect.getabsfile(pygments)).parent.parent /\
+                     'tests' / 'examplefiles' / example_file

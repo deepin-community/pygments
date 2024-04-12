@@ -20,6 +20,65 @@ containing tuples in the form ``(index, token, value)``.  Normally you don't
 need to do this since there are base lexers that do most of the work and that
 you can subclass.
 
+How to add a lexer
+==================
+
+To add a lexer, you have to perform the following steps:
+
+* Select a matching module under ``pygments/lexers``, or create a new
+  module for your lexer class.
+
+  .. note::
+
+     We encourage you to put your lexer class into its own module, unless it's a
+     very small derivative of an already existing lexer.
+
+* Next, make sure the lexer is known from outside the module. All modules
+  in the ``pygments.lexers`` package specify ``__all__``. For example,
+  ``automation.py`` sets::
+
+    __all__ = ['AutohotkeyLexer', 'AutoItLexer']
+
+  Add the name of your lexer class to this list (or create the list if your 
+  lexer   is the only class in the module).
+
+* Finally the lexer can be made publicly known by rebuilding the lexer mapping.
+
+  .. code-block:: console
+
+     $ tox -e mapfiles
+
+How to test your lexer
+======================
+
+To add a new lexer test, create a file with just your code snippet
+under ``tests/snippets/<lexer_alias>/``. Then run
+``tox -- --update-goldens <filename.txt>`` to auto-populate the
+currently expected tokens. Check that they look good and check in the
+file.
+
+Lexer tests are run with ``tox``, like all other tests. While
+working on a lexer, you can also run only the tests for that lexer
+with ``tox -- tests/snippets/language-name/`` and/or
+``tox -- tests/examplefiles/language-name/``.
+
+Running the test suite with ``tox`` will run lexers on the test
+inputs, and check that the output matches the expected tokens. If you
+are improving a lexer, it is normal that the token output changes. To
+update the expected token output for the tests, again use
+``tox -- --update-goldens <filename.txt>``.  Review the changes and
+check that they are as intended, then commit them along with your
+proposed code change.
+
+Large test files should go in ``tests/examplefiles``.  This works
+similar to ``snippets``, but the token output is stored in a separate
+file.  Output can also be regenerated with ``--update-goldens``.
+
+.. note::
+
+    When contributing a new lexer, you *must* provide an example file or test
+    snippet. Lexers which can't be tested will not be accepted.
+
 RegexLexer
 ==========
 
@@ -31,8 +90,22 @@ States are groups of regular expressions that are matched against the input
 string at the *current position*.  If one of these expressions matches, a
 corresponding action is performed (such as yielding a token with a specific
 type, or changing state), the current position is set to where the last match
-ended and the matching process continues with the first regex of the current
+ended and the matching process continues with the _first_ regex of the current
 state.
+
+.. note::
+
+    This means you're always jumping back to the first entry, i.e. you cannot match states in a particular order. For example, a state with the following rules won't work as intended:
+    
+    .. code:: python
+
+        'state': [
+            (r'\w+', Name,),
+            (r'\s+', Whitespace,),
+            (r'\w+', Keyword,)
+        ]
+
+    In the example above, ``Keyword`` will never be matched. To match certain token types in order, see below for the `bygroups` helper.
 
 Lexer states are kept on a stack: each time a new state is entered, the new
 state is pushed onto the stack.  The most basic lexers (like the `DiffLexer`)
@@ -715,7 +788,7 @@ contribute a new lexer, but you might find it useful in any case.
 
 * Be careful with ``.*``. This matches greedily as much as it can. For instance,
   a rule like ``@.*@`` will match the whole string ``@first@ second @third@``,
-  instead of matching ``@first@`` and ``@second@``. You can use ``@.*?@`` in
+  instead of matching ``@first@`` and ``@third@``. You can use ``@.*?@`` in
   this case to stop early. The ``?`` tries to match *as few times* as possible.
 
 * Beware of so-called "catastrophic backtracking".  As a first example, consider
