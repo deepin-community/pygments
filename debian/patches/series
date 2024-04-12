@@ -1,2 +1,3 @@
 0001-docs-moved-to-python-pygments-doc-binary-package.patch
 0002-pygments.bashcomp-Remove-hashbang-within-bash-comple.patch
+0003-Disable-lexer-examples-in-documentation.patch

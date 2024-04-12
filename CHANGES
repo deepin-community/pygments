@@ -3,6 +3,137 @@ Pygments changelog
 
 Pull request numbers before 2.4.2 are not linked as they refer to the now defunct Bitbucket project.
 
+Version 2.18.0
+--------------
+(unreleased)
+
+Version 2.17.2
+--------------
+(released November 21, 2023)
+
+* Fix a packaging issue on macOS (#2593)
+
+Version 2.17.1
+--------------
+(released November 19, 2023)
+
+- Updated lexers:
+
+  * TOML: Fix bug making lexing of single-quoted strings too eager
+
+Version 2.17.0
+--------------
+(released November 18, 2023)
+
+- New lexers:
+
+  * JSX (#2524, #709)
+  * Kusto (#2552)
+  * ldaprc (#2532)
+  * LDIF (#2489)
+  * PRQL (#2507, #2523, #2559)
+  * Visual Prolog and Visual Prolog Grammar (#2480)
+  * Vyper (#2531, #2579)
+
+- Updated lexers:
+
+  * Cypher: fix comment matching, add missing keywords (#2504)
+  * Fortran: add ``elseif`` keyword (#2528)
+  * Lean: make it available as ``lean3``, in preparation for
+    a possible switch to ``lean`` highlighting as Lean 4 (#2546)
+  * JSON: add MIME types and file extensions for several line-delimited
+    JSON formats (#2490)
+  * Nix: many improvements (#2551, #1800)
+  * OCaml: Add ``and`` keyword, remove ``value`` from keywords (#2521)
+  * Python: add ``starlark`` and ``bazel`` aliases (#2517, #2516)
+  * Snowball: Treat ``len`` like ``size`` (#2508)
+  * Spice: add ``panic`` keyword and ``->`` operator (#2510)
+  * squid.conf: fix catastrophic backtracking (#2583)
+  * TOML: rewritten, with many fixes (#2576)
+  * Turtle: support blank nodes (#2581)
+  * Wikitext: fix erroneous highlighting of LanguageConverter markup
+    (#2493), add missing variant languages (#2494)
+  * CMake: support ``[=[ bracketed arguments ]=]``` (#2549)
+
+- Fix ctags support and tests (#2487)
+- Include ``Lexer.add_filter`` in the documentation (#2519)
+- Add a ``Lean3Lexer`` alias (#2546)
+- The ``pygments.styles`` module contains a new ``STYLES`` variable
+  with a dictionary of built-in styles.  The old ``STYLE_MAP`` variable,
+  which uses a different format, is kept for backwards compatibility.
+- On Windows, add a new installation extra (``windows-terminal``) which pulls in
+  dependencies for colored console output. See :doc:`cmdline` for more details.
+  (#2505)
+- Support more file types in ``autopygmentize`` script (#2513)
+- Change color of numbers in ``rrt`` style (#2526)
+- Fix error when trying to look up plugin formatters by file extension
+  of the output format (#2563)
+- Use Hatchling as a build backend instead of setuptools.
+  This change is transparent to most users. Distribution packagers
+  who build without build isolation need to add hatchling as a build
+  dependency and remove setuptools. People downloading source distributions
+  and wheels from PyPI directly should note that they now have ``pygments``
+  in their file names instead of ``Pygments``. (#2573)
+- Improve the test framework to also check for lost tokens when processing the
+  snippets and example files (#2582.)
+- Improve the *Dracula* style definition to make it easier to maintain (#2575)
+
+Version 2.16.1
+--------------
+(released August 6th, 2023)
+
+- Fix ``native`` style missing from style list (#2484)
+
+Version 2.16.0
+--------------
+(released August 6th, 2023)
+
+- New lexers:
+
+  * ASN.1 (#2462)
+  * Blueprint (#2434)
+  * BQN (#2472)
+  * DNS zone files (#2464)
+  * GraphQL (#2428)
+  * Linux desktop files (following the specification of the
+    Freedesktop group, formerly known as XDG) (#2470)
+  * NVIDIA PTX (#2432)
+  * OpenSCAD (#2449)
+  * systemd (#2470)
+  * TLS presentation language (#2455)
+  * Verifpal (#2430)
+  * YARA (#2453)
+
+- Updated lexers:
+
+  * ASC: Add ``application/pem-certificate-chain`` mimetype (#2471)
+  * C/C++: Refine keyword lists (#2421, #2422)
+  * Carbon: Fix long processing times on invalid input, fix number
+    lexing (#2454, #2456)
+  * Elpi: Handle quotations (#2419)
+  * Go: Support additional built-ins (#2481)
+  * HTTP: Support empty headers (#2461), support more general methods (#2460),
+    also recognize responses in ``analyse_text`` implementation (#2460), and
+    highlight URL encoded data (#2465, #1620)
+  * Igor Pro: Update to Igor Pro 9 (#2482)
+  * lean: Recognize expressions nested within attributes (#1817)
+  * Macaulay2: Update builtins (#2457)
+  * Markdown: Allow extra characters after language name
+    in code blocks (#2437)
+  * NestedText: Update to version 3 (#2459)
+  * scdoc: Improve language guessing implementation (#2402)
+  * Spice: Update to latest version (#2476)
+  * Transact SQL: Add Pre-sorted Group keyword (#2417)
+  * Uxntal: Update for current runes (#2424)
+  * Wikitext: Fix templates in wiki links; fix a language converter false
+    positive; add bold italic markup (#2447)
+
+- Add ``Generic.EmphStrong`` token for bold italic markup (#2444)
+- Add Lightbulb style (#2474)
+- Improve contrast in Monokai style (#2448)
+- Add documentation how to create terminal code highlighting commands (#2131, #2425)
+- Add support for loading TrueType fonts to the ``ImageFormatter`` (#1960)
+
 Version 2.15.1
 --------------
 (released April 18th, 2023)
