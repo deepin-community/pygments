@@ -1,3 +1,10 @@
+pygments (2.17.2+dfsg-1deepin1) unstable; urgency=medium
+
+  * Fix CVE-2026-4539: ReDoS vulnerability in archetype lexer GUID and
+    ID patterns.
+
+ -- deepin-ci-robot <packages@deepin.org>  Wed, 15 Apr 2026 13:24:59 +0800
+
 pygments (2.17.2+dfsg-1) unstable; urgency=medium
 
   [ Stefano Rivera ]
